@@ -7,45 +7,70 @@ using System.Threading.Tasks;
 
 namespace Text_Based_RPG_Alpha.Classes
 {
-    internal class Map
+    internal class Map // Initialize
     {
-        private char[,] mapLayout;
+        private char[,] mapData;
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
         public Map(string filePath)
         {
             LoadMap(filePath);
         }
 
-        private void LoadMap(string filePath) // Load map from file
+        private void LoadMap(string filePath) // Load the map from the text file
         {
             string[] lines = File.ReadAllLines(filePath);
-            int width = lines[0].Length;
-            int height = lines.Length;
-            mapLayout = new char[height, width];
-            for (int y = 0; y < height; y++)
+            Height = lines.Length;
+            Width = lines[0].Length;
+            mapData = new char[Width, Height];
+
+            for (int y = 0; y < Height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < Width; x++)
                 {
-                    mapLayout[y, x] = lines[y][x];
+                    mapData[x, y] = lines[y][x];
                 }
             }
         }
 
-        public void DisplayMap() // Displays the map
+        public char GetTile(int x, int y) // Make walls
         {
-            for (int y = 0; y < mapLayout.GetLength(0); y++)
-            {
-                for (int x = 0; x < mapLayout.GetLength(1); x++)
-                {
-                    Console.Write(mapLayout[y, x]);
-                }
-                Console.WriteLine();
-            }
+            if (x < 0 || x >= Width || y < 0 || y >= Height) return '#';
+            return mapData[x, y];
         }
 
         public bool IsWalkable(int x, int y)
         {
-            return mapLayout[y, x] != '#' && mapLayout[y, x] != '~'; // Add simple wall dectection for now untill new map is made
+            char tile = GetTile(x, y);
+            return tile != '#' && tile != '~'; // Wall and acid check
+        }
+
+        public void Render() // Display the map
+        {
+            Console.Clear();
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    char tile = mapData[x, y];
+                    switch (tile) // Set colors for each tiles
+                    {
+                        case '#':
+                            Console.ForegroundColor = ConsoleColor.Gray;
+                            break;
+                        case '~':
+                            Console.ForegroundColor = ConsoleColor.Blue;
+                            break;
+                        default:
+                            Console.ForegroundColor = ConsoleColor.White;
+                            break;
+                    }
+                    Console.Write(tile);
+                }
+                Console.WriteLine();
+            }
+            Console.ResetColor();
         }
     }
 }
